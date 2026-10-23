@@ -36,8 +36,7 @@ def main():
     for i in range(1, args.count + 1):
         variant = gen.generate_variant(i)
         output_file = os.path.join(output_dir, f"variant_{i}.docx")
-        exporter.export_to_docx(variant, output_file)
-
+        exporter.export_to_docx(variant, args.subject, output_file)
     print("Готово!")
 
 if __name__ == "__main__":
