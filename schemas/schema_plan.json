@@ -1,0 +1,28 @@
+﻿{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VariantPlan",
+  "type": "object",
+  "required": ["planId", "subjectId", "version", "maxDifficulty", "targetDifficulty", "topicRepeatLimit", "positions"],
+  "properties": {
+    "planId": { "type": "string" },
+    "subjectId": { "type": "string", "enum": ["MATH-OGE", "PHYS-OGE"] },
+    "version": { "type": "string" },
+    "maxDifficulty": { "type": "number" },
+    "targetDifficulty": { "type": "number" },
+    "topicRepeatLimit": { "type": "integer" },
+    "positions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["positionId", "type", "allowedTopics", "maxPoints", "difficulty"],
+        "properties": {
+          "positionId": { "type": "integer" },
+          "type": { "type": "string" },
+          "allowedTopics": { "type": "array", "items": { "type": "string" } },
+          "maxPoints": { "type": "number" },
+          "difficulty": { "type": "number" }
+        }
+      }
+    }
+  }
+}

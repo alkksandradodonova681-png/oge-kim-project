@@ -1,0 +1,59 @@
+﻿{
+  "planId": "PHYS-PLAN-DEMO-1.0",
+  "subjectId": "PHYS-OGE",
+  "version": "1.0",
+  "maxDifficulty": 10.0,
+  "targetDifficulty": 9.5,
+  "topicRepeatLimit": 1,
+  "totalPositions": 5,
+  "maxPoints": 6,
+  "topicTree": {
+    "PHYS-MECH-01": [],
+    "PHYS-MECH-02": [],
+    "PHYS-THERM-01": [],
+    "PHYS-THERM-02": [],
+    "PHYS-ELEC-01": []
+  },
+  "positions": [
+    {
+      "positionId": 1,
+      "type": "multiple_choice",
+      "allowedTopics": ["PHYS-MECH-01"],
+      "maxPoints": 1,
+      "difficulty": 0.3,
+      "requiredMaterials": []
+    },
+    {
+      "positionId": 2,
+      "type": "short_answer",
+      "allowedTopics": ["PHYS-MECH-02"],
+      "maxPoints": 1,
+      "difficulty": 0.5,
+      "requiredMaterials": []
+    },
+    {
+      "positionId": 3,
+      "type": "multiple_choice",
+      "allowedTopics": ["PHYS-THERM-01"],
+      "maxPoints": 1,
+      "difficulty": 0.7,
+      "requiredMaterials": []
+    },
+    {
+      "positionId": 4,
+      "type": "short_answer",
+      "allowedTopics": ["PHYS-THERM-02"],
+      "maxPoints": 1,
+      "difficulty": 0.7,
+      "requiredMaterials": []
+    },
+    {
+      "positionId": 5,
+      "type": "extended_answer",
+      "allowedTopics": ["PHYS-ELEC-01"],
+      "maxPoints": 2,
+      "difficulty": 1.0,
+      "requiredMaterials": []
+    }
+  ]
+}
