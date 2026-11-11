@@ -1,0 +1,2 @@
+class LevelSumError(Exception):
+    pass
