@@ -43,16 +43,16 @@ class Generator():
             tasks = []
             for position in range(1,26):
                  rand_buf = random.choice(self.base.get(task_id=None, subject_id="MATH-OGE", position_id=position,
-                              topic_id=None, difficulty=levels[position - 1], type_ans=None, text=None, picture=None))
-                 tasks.append(Task(rand_buf["text"], rand_buf["picture"]))
+                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None))
+                 tasks.append(Task(rand_buf["text"], rand_buf["image"]))
 
         elif self.subject == "PHYS-OGE":
             levels = self.level_gen(22)
             tasks = []
             for position in range(1,23):
-                 rand_buf = random.choice(self.base.get(task_id=None, subject_id="MATH-OGE", position_id=position,
-                              topic_id=None, difficulty=levels[position - 1], type_ans=None, text=None, picture=None))
-                 tasks.append(Task(rand_buf["text"], rand_buf["picture"]))
+                 rand_buf = random.choice(self.base.get(task_id=None, subject_id="PHYS-OGE", position_id=position,
+                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None))
+                 tasks.append(Task(rand_buf["text"], rand_buf["image"]))
         return tasks
 
     def _image_par(self, doc, img, width, max_h=None, indent=0.0, new_page=False, keep=False):
