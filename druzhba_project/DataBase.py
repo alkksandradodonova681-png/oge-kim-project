@@ -1,8 +1,8 @@
 import pandas as pd
 
 DATA_LOCAL_TABLE_PATH = "data.json"
-COLUMNS = ["taskId","subjectId", "position", "prototypeId", "difficulty", "typeAns", "task"]
-SORT_KEYS = ["subjectID", "position", "prototypeID", "difficulty", "univ_iden_num"]
+COLUMNS = ["taskId","subjectId", "position", "prototype", "difficulty", "typeAns", "task"]
+SORT_KEYS = ["subjectID", "positionId", "prototypeId", "difficulty", "taskId"]
 
 
 class Image: pass
@@ -17,8 +17,8 @@ class DB:
         self.df_data = pd.DataFrame({
         "taskId": pd.Series(dtype="Int64"),
         "subjectId": pd.Series(dtype="str"),
-        "position": pd.Series(dtype="Int64"),
-        "prototype": pd.Series(dtype="Int64"),
+        "positionId": pd.Series(dtype="Int64"),
+        "prototypeId": pd.Series(dtype="Int64"),
         "difficulty": pd.Series(dtype="Int64"),
         "typeAns": pd.Series(dtype="str"),
         "task": pd.Series(dtype="str"),
@@ -37,12 +37,12 @@ class DB:
         self.df_data.to_json(DATA_LOCAL_TABLE_PATH, orient="records", force_ascii=False, indent=2)
 
 
-    def push(self, task_id: int, subject_id: str, position: int, prototype: int, difficulty: int, type_ans: str, task: str) -> None:
+    def push(self, task_id: int, subject_id: str, position_id: int, prototype_id: int, difficulty: int, type_ans: str, task: str) -> None:
         new_row = pd.DataFrame([{
             "taskId": task_id,
             "subjectId": subject_id,
-            "position": position,
-            "prototype": prototype,
+            "positionId": position_id,
+            "prototypeId": prototype_id,
             "difficulty": difficulty,
             "typeAns": type_ans,
             "task": task,
@@ -59,14 +59,14 @@ class DB:
         self.df_data = self.df_data.reset_index(drop=True)
 
 
-    def get(self, subject_id: str, task_id = None, position = None, prototype = None, difficulty = None, type_ans = None, task = None) -> list[dict]:
+    def get(self, subject_id: str, task_id = None, position_id = None, prototype_id = None, difficulty = None, type_ans = None, task = None) -> list[dict]:
         mask = self.df_data["subjectId"] == subject_id
         if task_id is not None:
             mask &= self.df_data["taskId"] == task_id 
-        if position is not None:
-            mask &= self.df_data["position"] == position
-        if prototype is not None:
-            mask &= self.df_data["prototype"] == prototype
+        if position_id is not None:
+            mask &= self.df_data["positionId"] == position_id
+        if prototype_id is not None:
+            mask &= self.df_data["prototypeId"] == prototype_id
         if difficulty is not None:
             mask &= self.df_data["difficulty"] == difficulty
         if type_ans is not None:
