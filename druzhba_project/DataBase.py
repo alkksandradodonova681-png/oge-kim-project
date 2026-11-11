@@ -1,7 +1,7 @@
 import pandas as pd
 
 DATA_LOCAL_TABLE_PATH = "data.json"
-COLUMNS = ["taskId","subjectId", "position", "prototype", "difficulty", "typeAns", "task"]
+COLUMNS = ["taskId","subjectId", "position", "prototype", "difficulty", "typeAns", "text"]
 SORT_KEYS = ["subjectID", "positionId", "prototypeId", "difficulty", "taskId"]
 
 
@@ -21,7 +21,7 @@ class DB:
         "prototypeId": pd.Series(dtype="Int64"),
         "difficulty": pd.Series(dtype="Int64"),
         "typeAns": pd.Series(dtype="str"),
-        "task": pd.Series(dtype="str"),
+        "text": pd.Series(dtype="str"),
     })
         return self.df_data
         
@@ -37,7 +37,7 @@ class DB:
         self.df_data.to_json(DATA_LOCAL_TABLE_PATH, orient="records", force_ascii=False, indent=2)
 
 
-    def push(self, task_id: int, subject_id: str, position_id: int, prototype_id: int, difficulty: int, type_ans: str, task: str) -> None:
+    def push(self, task_id: int, subject_id: str, position_id: int, prototype_id: int, difficulty: int, type_ans: str, text: str) -> None:
         new_row = pd.DataFrame([{
             "taskId": task_id,
             "subjectId": subject_id,
@@ -45,7 +45,7 @@ class DB:
             "prototypeId": prototype_id,
             "difficulty": difficulty,
             "typeAns": type_ans,
-            "task": task,
+            "text": text,
         }])
         self.df_data = pd.concat([self.df_data, new_row], ignore_index=True)
         self.df_data = self.df_data.sort_values(
@@ -59,7 +59,7 @@ class DB:
         self.df_data = self.df_data.reset_index(drop=True)
 
 
-    def get(self, subject_id: str, task_id = None, position_id = None, prototype_id = None, difficulty = None, type_ans = None, task = None) -> list[dict]:
+    def get(self, subject_id: str, task_id = None, position_id = None, prototype_id = None, difficulty = None, type_ans = None, text = None) -> list[dict]:
         mask = self.df_data["subjectId"] == subject_id
         if task_id is not None:
             mask &= self.df_data["taskId"] == task_id 
@@ -71,6 +71,6 @@ class DB:
             mask &= self.df_data["difficulty"] == difficulty
         if type_ans is not None:
             mask &= self.df_data["typeAns"] == type_ans
-        if task is not None:
-            mask &= self.df_data["task"] == task
+        if text is not None:
+            mask &= self.df_data["text"] == text
         return self.df_data[mask].to_dict(orient="records")
