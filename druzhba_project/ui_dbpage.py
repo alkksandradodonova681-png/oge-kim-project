@@ -88,6 +88,12 @@ class Ui_MainWindow(object):
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(40, 640, 281, 91))
         self.label.setAcceptDrops(True)
+        self.label.setStyleSheet(u"border: 1px dashed gray;")
+        self.label_answer = QLabel(self.centralwidget)
+        self.label_answer.setObjectName(u"label_answer")
+        self.label_answer.setGeometry(QRect(400, 640, 281, 91))
+        self.label_answer.setAcceptDrops(True)
+        self.label_answer.setStyleSheet(u"border: 1px dashed gray;")
         self.textBrowser_10 = QTextBrowser(self.centralwidget)
         self.textBrowser_10.setObjectName(u"textBrowser_10")
         self.textBrowser_10.setGeometry(QRect(30, 380, 131, 31))
@@ -202,6 +208,7 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\u0442\u0435\u043a\u0441\u0442 \u0437\u0430\u0434\u0430\u043d\u0438\u044f</p></body></html>", None))
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u0412 \u0433\u0435\u043d\u0435\u0440\u0430\u0442\u043e\u0440", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430(\u0435\u0441\u043b\u0438 \u043d\u0430\u0434\u0430->\u043f\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044c png)", None))
+        self.label_answer.setText(QCoreApplication.translate("MainWindow", u"\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 \u043e\u0442\u0432\u0435\u0442\u0430(\u0435\u0441\u043b\u0438 \u043d\u0430\u0434\u0430->\u043f\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044c png)", None))
         self.textBrowser_10.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

@@ -1,7 +1,7 @@
 import pandas as pd
 
 DATA_LOCAL_TABLE_PATH = "data.json"
-COLUMNS = ["taskId","subjectId", "positionId", "prototypeId", "topicId", "difficulty","typeAns", "text", "image"]
+COLUMNS = ["taskId","subjectId", "positionId", "prototypeId", "topicId", "difficulty","typeAns", "text", "image", "answer"]
 SORT_KEYS = ["subjectId", "positionId", "prototypeId", "difficulty", "taskId"]
 
 
@@ -23,13 +23,16 @@ class DB:
         "difficulty": pd.Series(dtype="Int64"),
         "typeAns": pd.Series(dtype="str"),
         "text": pd.Series(dtype="str"),
-        "image": pd.Series(dtype="str")
+        "image": pd.Series(dtype="str"),
+        "answer": pd.Series(dtype="str")
     })
         return self.df_data
         
         
     def load(self):
         self.df_data = pd.read_json(DATA_LOCAL_TABLE_PATH)
+        if "answer" not in self.df_data.columns:
+            self.df_data["answer"] = ""
         return self.df_data
         
 
@@ -37,7 +40,7 @@ class DB:
         self.df_data.to_json(DATA_LOCAL_TABLE_PATH, orient="records", force_ascii=False, indent=2)
 
 
-    def push(self, task_id: int, subject_id: str, position_id: int, prototype_id: int, topic_id: str, difficulty: int, type_ans: str, text: str, image: str = "") -> None:
+    def push(self, task_id: int, subject_id: str, position_id: int, prototype_id: int, topic_id: str, difficulty: int, type_ans: str, text: str, image: str = "", answer: str = "") -> None:
         new_row = pd.DataFrame([{
             "taskId": task_id,
             "subjectId": subject_id,
@@ -47,7 +50,8 @@ class DB:
             "difficulty": difficulty,
             "typeAns": type_ans,
             "text": text,
-            "image": image
+            "image": image,
+            "answer": answer
         }])
         self.df_data = pd.concat([self.df_data, new_row], ignore_index=True)
         self.df_data = self.df_data.sort_values(
@@ -64,7 +68,7 @@ class DB:
         return True
 
 
-    def get(self, subject_id: str, task_id = None, position_id = None, prototype_id = None, topic_id = "", difficulty = None, type_ans = None, text = None, image = "") -> list[dict]:
+    def get(self, subject_id: str, task_id = None, position_id = None, prototype_id = None, topic_id = "", difficulty = None, type_ans = None, text = None, image = "", answer = None) -> list[dict]:
         mask = self.df_data["subjectId"] == subject_id
         if task_id is not None:
             mask &= self.df_data["taskId"] == task_id 
@@ -82,4 +86,6 @@ class DB:
             mask &= self.df_data["text"] == text
         if image is not None:
             mask &= self.df_data["image"] == image
+        if answer is not None:
+            mask &= self.df_data["answer"] == answer
         return self.df_data[mask].to_dict(orient="records")

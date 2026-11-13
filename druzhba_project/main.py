@@ -27,9 +27,14 @@ class DBWindow(QMainWindow):
             self.db.save()
 
         self.base64_image = ""
+        self.base64_answer = ""
         self.ui.label.setAcceptDrops(True)
         self.ui.label.dragEnterEvent = self.dragEnterEvent
         self.ui.label.dropEvent = self.dropEvent
+
+        self.ui.label_answer.setAcceptDrops(True)
+        self.ui.label_answer.dragEnterEvent = self.dragEnterEvent
+        self.ui.label_answer.dropEvent = self.dropEvent_answer
 
         self.ui.pushButton.clicked.connect(self.add_task)       
         self.ui.pushButton_2.clicked.connect(self.delete_task)  
@@ -50,6 +55,17 @@ class DBWindow(QMainWindow):
                 
                 pixmap = QPixmap(file_path)
                 self.ui.label.setPixmap(pixmap.scaled(self.ui.label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
+                break
+
+    def dropEvent_answer(self, event):
+        for url in event.mimeData().urls():
+            file_path = url.toLocalFile()
+            if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+                with open(file_path, "rb") as image_file:
+                    self.base64_answer = base64.b64encode(image_file.read()).decode('utf-8')
+
+                pixmap = QPixmap(file_path)
+                self.ui.label_answer.setPixmap(pixmap.scaled(self.ui.label_answer.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
                 break
 
     def add_task(self):
@@ -78,7 +94,7 @@ class DBWindow(QMainWindow):
                 return
 
             #Отправляем в базу (8 аргументов)
-            self.db.push(task_id, subject_id, position_id, prototype_id, "", difficulty, type_ans, text, self.base64_image)
+            self.db.push(task_id, subject_id, position_id, prototype_id, "", difficulty, type_ans, text, self.base64_image, self.base64_answer)
             self.db.save()
             print(f"Задание успешно добавлено! Присвоен ID: {task_id}")
 
@@ -87,7 +103,9 @@ class DBWindow(QMainWindow):
             self.ui.lineEdit_3.clear()
             self.ui.textEdit.clear() 
             self.ui.label.clear()
+            self.ui.label_answer.clear()
             self.base64_image = ""
+            self.base64_answer = ""
             
         except ValueError:
             QMessageBox.critical(self, "Ошибка формата", "В поля 'Номер по порядку' и 'Номер прототипа' нужно вводить ЧИСЛА!")
