@@ -5,6 +5,7 @@ import random
 import base64
 import io
 import os
+import re
 from datetime import datetime
 from docx import Document
 from docx.enum.section import WD_SECTION
@@ -12,8 +13,13 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Pt
 from PIL import Image
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+
 class Generator():
-    def __init__(self,subject: str, level_sum: int, base: DB):
+    def __init__(self, subject: str, level_sum: int, base: DB):
         self.subject = subject
         self.level_sum = level_sum
         self.base = base
@@ -42,18 +48,34 @@ class Generator():
             levels = self.level_gen(25)
             tasks = []
             for position in range(1,26):
-                 rand_buf = random.choice(self.base.get(task_id=None, subject_id="MATH-OGE", position_id=position,
-                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None))
-                 tasks.append(Task(rand_buf["text"], rand_buf["image"], rand_buf["answer"]))
+                 candidates = self.base.get(task_id=None, subject_id="MATH-OGE", position_id=position,
+                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None)
+                 if not candidates:
+                     raise ValueError(f"Нет заданий для позиции {position}, сложность {levels[position-1]}")
+                 rand_buf = random.choice(candidates)
+                 tasks.append(Task(rand_buf.get("text",""), rand_buf.get("image",[]), rand_buf.get("answer",""), rand_buf.get("answerImages",[])))
 
         elif self.subject == "PHYS-OGE":
             levels = self.level_gen(22)
             tasks = []
             for position in range(1,23):
-                 rand_buf = random.choice(self.base.get(task_id=None, subject_id="PHYS-OGE", position_id=position,
-                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None))
-                 tasks.append(Task(rand_buf["text"], rand_buf["image"], rand_buf["answer"]))
+                 candidates = self.base.get(task_id=None, subject_id="PHYS-OGE", position_id=position,
+                              topic_id="", difficulty=levels[position - 1], type_ans=None, text=None, image=None)
+                 if not candidates:
+                     raise ValueError(f"Нет заданий для позиции {position}, сложность {levels[position-1]}")
+                 rand_buf = random.choice(candidates)
+                 tasks.append(Task(rand_buf.get("text",""), rand_buf.get("image",[]), rand_buf.get("answer",""), rand_buf.get("answerImages",[])))
         return tasks
+
+    def _render_latex_to_png(self, latex_text: str, fontsize=12):
+        """Рендерит LaTeX в картинку и возвращает BytesIO."""
+        fig = plt.figure(figsize=(0.01, 0.01))
+        fig.text(0, 0, f"${latex_text}$", fontsize=fontsize, color='black')
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', pad_inches=0.05, transparent=True, dpi=300)
+        plt.close(fig)
+        buf.seek(0)
+        return buf
 
     def _image_par(self, doc, img, width, max_h=None, indent=0.0, new_page=False, keep=False):
         if max_h and width * img.height / img.width > max_h:
@@ -76,14 +98,36 @@ class Generator():
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p.paragraph_format.space_after = Pt(6)
         p.paragraph_format.keep_together = True
-        p.paragraph_format.keep_with_next = bool(task.picture) or answer_line
+        
+        #картинки в задании (может быть несколько)
+        pics = task.picture if isinstance(task.picture, list) else ([task.picture] if task.picture else [])
+        p.paragraph_format.keep_with_next = bool(pics) or answer_line
+        
         p.add_run(f"{number}. ").bold = True
-        p.add_run(task.text)
 
-        if task.picture:
-            img = Image.open(io.BytesIO(base64.b64decode(task.picture)))
-            width = min(img.width / 96 * 2.54, 12)
-            self._image_par(doc, img, width, max_h=8, keep=answer_line)
+        #разбиваем текст по формулам $...$
+        parts = re.split(r'(\$.*?\$)', task.text)
+        for part in parts:
+            if part.startswith('$') and part.endswith('$') and len(part) > 2:
+                latex = part[1:-1]
+                try:
+                    img_stream = self._render_latex_to_png(latex, fontsize=12)
+                    run = p.add_run()
+                    run.add_picture(img_stream, height=Cm(0.55))
+                except Exception:
+                    p.add_run(f"[Формула: {latex}]")
+            else:
+                p.add_run(part)
+
+        for pic in pics:
+            if not pic:
+                continue
+            try:
+                img = Image.open(io.BytesIO(base64.b64decode(pic)))
+                width = min(img.width / 96 * 2.54, 12)
+                self._image_par(doc, img, width, max_h=8, keep=answer_line)
+            except Exception:
+                pass
 
         if answer_line:
             p = doc.add_paragraph("Ответ: " + "_" * 28 + ".")
@@ -143,6 +187,73 @@ class Generator():
         doc.save(path)
         return path
 
-    def get_variants(self,amount: int) -> int:
+    def get_variants(self, amount: int) -> int:
         for _ in range(amount):
             self.render(self.generate())
+
+
+    def render_answers(self, tasks: list = None, out_dir: str = "Variants") -> str:
+        if tasks is None:
+            tasks = self.generate()
+
+        prefix = "math" if self.subject == "MATH-OGE" else "phys"
+
+        doc = Document()
+        doc.styles["Normal"].font.name = "Times New Roman"
+        doc.styles["Normal"].font.size = Pt(12)
+
+        sec = doc.sections[0]
+        sec.page_width, sec.page_height = Cm(21), Cm(29.7)
+        sec.top_margin = sec.bottom_margin = sec.left_margin = sec.right_margin = Cm(2)
+
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run("Ответы к варианту")
+        run.bold = True
+        run.font.size = Pt(14)
+
+        def is_base64_image(s: str) -> bool:
+            if not s or len(s) < 100:
+                return False
+            return s.startswith(("iVBOR", "/9j/", "R0lGOD", "UklGR"))
+
+        for number, task in enumerate(tasks, start=1):
+            p = doc.add_paragraph()
+            p.paragraph_format.space_after = Pt(6)
+            p.add_run(f"{number}. ").bold = True
+            
+            #разбиваем текст по формулам $...$
+            parts = re.split(r'(\$.*?\$)', task.text)
+            for part in parts:
+                if part.startswith('$') and part.endswith('$') and len(part) > 2:
+                    latex = part[1:-1]
+                    try:
+                        img_stream = self._render_latex_to_png(latex, fontsize=12)
+                        run = p.add_run()
+                        run.add_picture(img_stream, height=Cm(0.55))
+                    except Exception:
+                        p.add_run(f"[Формула: {latex}]")
+                else:
+                    p.add_run(part)
+
+            #текстовый ответ
+            if task.answer and not is_base64_image(task.answer):
+                p = doc.add_paragraph(f"Ответ: {task.answer}")
+                p.paragraph_format.space_after = Pt(14)
+
+            #картинки ответа (может быть несколько)
+            if task.answer_images:
+                for pic in task.answer_images:
+                    if not pic:
+                        continue
+                    try:
+                        img = Image.open(io.BytesIO(base64.b64decode(pic)))
+                        width = min(img.width / 96 * 2.54, 12)
+                        self._image_par(doc, img, width, max_h=8)
+                    except Exception:
+                        pass
+
+        os.makedirs(out_dir, exist_ok=True)
+        path = os.path.join(out_dir, f"{prefix}_answers_{datetime.now():%Y%m%d_%H%M%S}.docx")
+        doc.save(path)
+        return path

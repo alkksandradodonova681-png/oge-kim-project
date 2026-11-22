@@ -11,23 +11,20 @@ from Generator import Generator
 from Exeptions import LevelSumError
 
 
-# Класс для второй страницы(работа с БД)
+#класс для второй страницы(работа с БД)
 class DBWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_DBWindow()
         self.ui.setupUi(self)
         
-        self.db = DB()
-        try:
-            self.db.load()
-        except Exception:
-            print("База не найдена, создаем новую...")
-            self.db.create()
-            self.db.save()
+        self.db_path = None
+        self.db = None
+        self._load_db_for_current_subject()
 
-        self.base64_image = ""
-        self.base64_answer = ""
+        self.base64_images = []        # список картинок задания
+        self.base64_answer_images = [] # список картинок ответа
+        
         self.ui.label.setAcceptDrops(True)
         self.ui.label.dragEnterEvent = self.dragEnterEvent
         self.ui.label.dropEvent = self.dropEvent
@@ -38,7 +35,38 @@ class DBWindow(QMainWindow):
 
         self.ui.pushButton.clicked.connect(self.add_task)       
         self.ui.pushButton_2.clicked.connect(self.delete_task)  
-        self.ui.pushButton_3.clicked.connect(self.close)        
+        self.ui.pushButton_3.clicked.connect(self.close)
+        
+        #при смене предмета — переключаем базу
+        self.ui.comboBox.currentIndexChanged.connect(self._on_subject_changed)
+
+    def _load_db_for_current_subject(self):
+        subject = self.ui.comboBox.currentText()
+        if subject == "PHYS-OGE":
+            self.db_path = "phys_data.json"
+        else:
+            self.db_path = "math_data.json"
+        self.db = DB(self.db_path)
+        try:
+            self.db.load()
+        except Exception:
+            print("База не найдена, создаем новую...")
+            self.db.create()
+            self.db.save()
+
+    def _on_subject_changed(self):
+        if self.db is not None:
+            self.db.save()
+        self._load_db_for_current_subject()
+        self.ui.lineEdit_2.clear()
+        self.ui.lineEdit_3.clear()
+        self.ui.textEdit.clear()
+        self.ui.label.clear()
+        self.ui.label_answer.clear()
+        if hasattr(self.ui, "answer_side"):
+            self.ui.answer_side.clear()
+        self.base64_images = []
+        self.base64_answer_images = []
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -51,7 +79,8 @@ class DBWindow(QMainWindow):
             file_path = url.toLocalFile()
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
                 with open(file_path, "rb") as image_file:
-                    self.base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+                    b64 = base64.b64encode(image_file.read()).decode('utf-8')
+                    self.base64_images.append(b64)
                 
                 pixmap = QPixmap(file_path)
                 self.ui.label.setPixmap(pixmap.scaled(self.ui.label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -62,7 +91,8 @@ class DBWindow(QMainWindow):
             file_path = url.toLocalFile()
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp')):
                 with open(file_path, "rb") as image_file:
-                    self.base64_answer = base64.b64encode(image_file.read()).decode('utf-8')
+                    b64 = base64.b64encode(image_file.read()).decode('utf-8')
+                    self.base64_answer_images.append(b64)
 
                 pixmap = QPixmap(file_path)
                 self.ui.label_answer.setPixmap(pixmap.scaled(self.ui.label_answer.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation))
@@ -70,16 +100,20 @@ class DBWindow(QMainWindow):
 
     def add_task(self):
         try:
-            #Заполняем дыры в ID, начиная с 100_000(метод для заполнения отрезка после удаления)
+            # Заполняем дыры в ID, начиная с 100_000, проверяя обе базы
+            used_ids = set()
+            for path in ("math_data.json", "phys_data.json"):
+                other_db = DB(path)
+                try:
+                    other_db.load()
+                except Exception:
+                    continue
+                if other_db.df_data is not None and not other_db.df_data.empty:
+                    used_ids.update(other_db.df_data["taskId"].dropna().astype(int).tolist())
+            
             task_id = 100_000
-            if self.db.df_data is not None and not self.db.df_data.empty:
-                existing_ids = sorted(self.db.df_data["taskId"].dropna().astype(int).tolist())
-                
-                for existing_id in existing_ids:
-                    if existing_id == task_id:
-                        task_id += 1
-                    elif existing_id > task_id:
-                        break
+            while task_id in used_ids:
+                task_id += 1
 
 
             subject_id = self.ui.comboBox.currentText()         
@@ -93,8 +127,13 @@ class DBWindow(QMainWindow):
                 QMessageBox.warning(self, "Ошибка заполнения", "Выберите предмет, тип ответа и введите текст задания!")
                 return
 
-            #Отправляем в базу (8 аргументов)
-            self.db.push(task_id, subject_id, position_id, prototype_id, "", difficulty, type_ans, text, self.base64_image, self.base64_answer)
+            #текстовый ответ
+            answer_text = ""
+            if hasattr(self.ui, "answer_side"):
+                answer_text = self.ui.answer_side.toPlainText().strip()
+
+            self.db.push(task_id, subject_id, position_id, prototype_id, "", difficulty, type_ans, text, 
+                         self.base64_images, answer_text, self.base64_answer_images)
             self.db.save()
             print(f"Задание успешно добавлено! Присвоен ID: {task_id}")
 
@@ -104,8 +143,10 @@ class DBWindow(QMainWindow):
             self.ui.textEdit.clear() 
             self.ui.label.clear()
             self.ui.label_answer.clear()
-            self.base64_image = ""
-            self.base64_answer = ""
+            if hasattr(self.ui, "answer_side"):
+                self.ui.answer_side.clear()
+            self.base64_images = []
+            self.base64_answer_images = []
             
         except ValueError:
             QMessageBox.critical(self, "Ошибка формата", "В поля 'Номер по порядку' и 'Номер прототипа' нужно вводить ЧИСЛА!")
@@ -113,21 +154,41 @@ class DBWindow(QMainWindow):
 
     def delete_task(self):
         try:
-            task_id = int(self.ui.lineEdit_5.text()) 
-            success = self.db.delete(task_id)
-            
-            if success:
-                self.db.save()
-                QMessageBox.information(self, "Успех", f"Задание с ID {task_id} успешно удалено!")
-                self.ui.lineEdit_5.clear()
-            else:
-                QMessageBox.warning(self, "Не найдено", f"Задания с ID {task_id} не существует в базе!")
-                
+            task_id = int(self.ui.lineEdit_5.text())
         except ValueError:
             QMessageBox.critical(self, "Ошибка формата", "ID для удаления должен быть числом!")
+            return
+
+        #Ищем, в какой базе находится ID
+        found_in = None
+        for path in ("math_data.json", "phys_data.json"):
+            db = DB(path)
+            try:
+                db.load()
+            except Exception:
+                continue
+            if db.df_data is not None and not db.df_data.empty:
+                if task_id in db.df_data["taskId"].values:
+                    found_in = (path, db)
+                    break
+
+        if found_in is None:
+            QMessageBox.warning(self, "Не найдено", f"Задания с ID {task_id} нет ни в одной базе!")
+            return
+
+        path, db = found_in
+        db.delete(task_id)
+        db.save()
+
+        #Обновляем текущую открытую базу, если это она
+        if path == self.db_path:
+            self.db = db
+
+        QMessageBox.information(self, "Успех", f"Задание с ID {task_id} удалено из {path}!")
+        self.ui.lineEdit_5.clear()
 
 
-# Класс для главной страницы (генератора)
+#класс для главной страницы (генератора)
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -142,8 +203,10 @@ class MainWindow(QMainWindow):
     def on_button_click(self):
         if self.ui.radioButton_4.isChecked(): 
             subject = "MATH-OGE" 
+            db_path = "math_data.json"
         elif self.ui.radioButton_5.isChecked():
             subject = "PHYS-OGE"
+            db_path = "phys_data.json"
         else:
             QMessageBox.warning(self, "Внимание", "Пожалуйста, выберите предмет и сложность!")
             return
@@ -153,7 +216,7 @@ class MainWindow(QMainWindow):
         result_text = f"Предмет: {subject}\nКол-во: {count}"
         self.ui.textBrowser_4.setText(result_text)
 
-        db = DB()
+        db = DB(db_path)
         try:
             db.load()
             
@@ -168,7 +231,6 @@ class MainWindow(QMainWindow):
             path = gen.render()
             
             QMessageBox.information(self, "Успех", f"Вариант успешно сохранен:\n{path}")
-            self.ui.textBrowser_4.setText(f"Файл сохранен по пути:\n{path}")
 
         except LevelSumError:
             QMessageBox.critical(self, "Ошибка суммы уровней", "Сумма уровней не соответствует выбранному предмету!")
@@ -178,12 +240,11 @@ class MainWindow(QMainWindow):
     def open_db_window(self):
         if self.db_window is None:
             self.db_window = DBWindow()
-        
         self.db_window.show()
         self.db_window.raise_()          
         self.db_window.activateWindow()
 
-# Старт
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()

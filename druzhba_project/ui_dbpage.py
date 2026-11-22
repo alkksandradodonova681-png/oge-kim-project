@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'dbpage.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.12.0
+## Created by: Qt User Interface Compiler version 6.8.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -15,9 +15,10 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QLabel, QLineEdit,
-    QMainWindow, QMenuBar, QPushButton, QSizePolicy,
-    QStatusBar, QTextBrowser, QTextEdit, QWidget)
+from PySide6.QtWidgets import (QApplication, QComboBox, QFrame, QLabel,
+    QLineEdit, QMainWindow, QMenuBar, QPushButton,
+    QSizePolicy, QStatusBar, QTextBrowser, QTextEdit,
+    QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -86,14 +87,10 @@ class Ui_MainWindow(object):
         self.pushButton_3.setGeometry(QRect(650, 810, 81, 26))
         self.label = QLabel(self.centralwidget)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(40, 640, 281, 91))
+        self.label.setEnabled(True)
+        self.label.setGeometry(QRect(30, 640, 281, 91))
         self.label.setAcceptDrops(True)
-        self.label.setStyleSheet(u"border: 1px dashed gray;")
-        self.label_answer = QLabel(self.centralwidget)
-        self.label_answer.setObjectName(u"label_answer")
-        self.label_answer.setGeometry(QRect(400, 640, 281, 91))
-        self.label_answer.setAcceptDrops(True)
-        self.label_answer.setStyleSheet(u"border: 1px dashed gray;")
+        self.label.setStyleSheet(u"border: 2px dashed gray;")
         self.textBrowser_10 = QTextBrowser(self.centralwidget)
         self.textBrowser_10.setObjectName(u"textBrowser_10")
         self.textBrowser_10.setGeometry(QRect(30, 380, 131, 31))
@@ -104,6 +101,29 @@ class Ui_MainWindow(object):
         self.comboBox_3.addItem("")
         self.comboBox_3.setObjectName(u"comboBox_3")
         self.comboBox_3.setGeometry(QRect(170, 380, 141, 31))
+        self.label_answer = QLabel(self.centralwidget)
+        self.label_answer.setObjectName(u"label_answer")
+        self.label_answer.setGeometry(QRect(370, 370, 261, 91))
+        self.label_answer.setStyleSheet(u"border: 2px dashed gray;")
+        self.textBrowser_3 = QTextBrowser(self.centralwidget)
+        self.textBrowser_3.setObjectName(u"textBrowser_3")
+        self.textBrowser_3.setGeometry(QRect(370, 320, 281, 31))
+        self.answer_side = QTextEdit(self.centralwidget)
+        self.answer_side.setObjectName(u"answer_side")
+        self.answer_side.setGeometry(QRect(370, 550, 261, 81))
+        self.textBrowser_11 = QTextBrowser(self.centralwidget)
+        self.textBrowser_11.setObjectName(u"textBrowser_11")
+        self.textBrowser_11.setGeometry(QRect(450, 480, 101, 61))
+        self.line = QFrame(self.centralwidget)
+        self.line.setObjectName(u"line")
+        self.line.setGeometry(QRect(360, 250, 361, 20))
+        self.line.setFrameShape(QFrame.Shape.HLine)
+        self.line.setFrameShadow(QFrame.Shadow.Sunken)
+        self.line_2 = QFrame(self.centralwidget)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setGeometry(QRect(353, 90, 20, 171))
+        self.line_2.setFrameShape(QFrame.Shape.VLine)
+        self.line_2.setFrameShadow(QFrame.Shadow.Sunken)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
@@ -208,7 +228,6 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\u0442\u0435\u043a\u0441\u0442 \u0437\u0430\u0434\u0430\u043d\u0438\u044f</p></body></html>", None))
         self.pushButton_3.setText(QCoreApplication.translate("MainWindow", u"\u0412 \u0433\u0435\u043d\u0435\u0440\u0430\u0442\u043e\u0440", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430(\u0435\u0441\u043b\u0438 \u043d\u0430\u0434\u0430->\u043f\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044c png)", None))
-        self.label_answer.setText(QCoreApplication.translate("MainWindow", u"\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 \u043e\u0442\u0432\u0435\u0442\u0430(\u0435\u0441\u043b\u0438 \u043d\u0430\u0434\u0430->\u043f\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044c png)", None))
         self.textBrowser_10.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -222,5 +241,30 @@ class Ui_MainWindow(object):
         self.comboBox_3.setItemText(2, QCoreApplication.translate("MainWindow", u"short_answer", None))
         self.comboBox_3.setItemText(3, QCoreApplication.translate("MainWindow", u"extended_answer", None))
 
+        self.label_answer.setText(QCoreApplication.translate("MainWindow", u"\u043a\u0430\u0440\u0442\u0438\u043d\u043a\u0430 \u043e\u0442\u0432\u0435\u0442\u0430(\u0435\u0441\u043b\u0438 \u043d\u0430\u0434\u0430-> \u043f\u0435\u0440\u0435\u0442\u0430\u0449\u0438\u0442\u044c)", None))
+        self.textBrowser_3.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\u0412\u0441\u0442\u0430\u0432\u044c\u0442\u0435 \u043e\u0442\u0432\u0435\u0442 (\u0432 \u0437\u0430\u0432\u0438\u0441\u0438\u043c\u043e\u0441\u0442\u0438 \u043e\u0442 \u0444\u043e\u0440\u043c\u0430\u0442\u0430):</p></body></html>", None))
+        self.answer_side.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">\u0442\u0435\u043a\u0441\u0442\u043e\u043c</p></body></html>", None))
+        self.textBrowser_11.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"hr { height: 1px; border-width: 0; }\n"
+"li.unchecked::marker { content: \"\\2610\"; }\n"
+"li.checked::marker { content: \"\\2612\"; }\n"
+"</style></head><body style=\" font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
+"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:28pt;\">\u0438\u043b\u0438</span></p></body></html>", None))
     # retranslateUi
 
